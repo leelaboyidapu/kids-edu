@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 function App() {
-  const TOTAL_QUESTIONS = 10;
+  const TOTAL_QUESTIONS = 2; // Total number of questions in the game
 
   const [gameActive, setGameActive] = useState(false);
   const [question, setQuestion] = useState({});
@@ -10,10 +10,11 @@ function App() {
   const [input, setInput] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [startTime, setStartTime] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0); // Total time in seconds
 
   const inputRef = useRef(null);
 
+  // Timer effect
   useEffect(() => {
     let timer;
     if (gameActive) {
@@ -25,6 +26,7 @@ function App() {
     return () => clearInterval(timer);
   }, [gameActive, startTime]);
 
+  // Auto-focus on input box when question changes
   useEffect(() => {
     if (gameActive) {
       inputRef.current?.focus();
@@ -58,6 +60,14 @@ function App() {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
+  const getEncouragingMessage = (score, total) => {
+    const percentage = (score / total) * 100;
+    if (percentage === 100) return "Amazing! You got them all right!";
+    if (percentage >= 80) return "Great job! You're a multiplication wizard!";
+    if (percentage >= 50) return "Good effort! Keep practicing!";
+    return "Don't give up! You'll get better!";
   };
 
   return (
@@ -100,14 +110,21 @@ function App() {
       )}
       {!gameActive && currentQuestion > TOTAL_QUESTIONS && (
         <div className="w-4/5 max-w-md mt-6 p-6 bg-white text-black rounded-lg shadow-xl text-center">
-          <h1 className="text-2xl font-bold text-indigo-600">Game Over!</h1>
-          <p className="text-lg font-medium">Your Score: {score}/{TOTAL_QUESTIONS}</p>
-          <p className="text-lg font-medium">Total Time: {formatTime(elapsedTime)}</p>
+          <h1 className="text-3xl font-bold text-purple-600">Game Over!</h1>
+          <div className="bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-lg text-white shadow-lg">
+            <p className="text-xl font-medium mb-4">
+              You answered <span className="font-bold">{score}</span> out of {TOTAL_QUESTIONS} questions correctly!
+            </p>
+            <p className="text-xl font-medium mb-4">Time Taken: {formatTime(elapsedTime)}</p>
+            <p className="text-lg font-semibold mt-4 animate-bounce">
+              {getEncouragingMessage(score, TOTAL_QUESTIONS)}
+            </p>
+          </div>
           <button
             onClick={startGame}
-            className="mt-4 w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-300"
+            className="mt-6 w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-lg font-semibold transition duration-300"
           >
-            Play Again
+            Play Again 🎉
           </button>
         </div>
       )}
