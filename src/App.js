@@ -1,19 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 function App() {
-  const [maxTable, setMaxTable] = useState(15);
+  const TOTAL_QUESTIONS = 10;
+
   const [gameActive, setGameActive] = useState(false);
   const [question, setQuestion] = useState({});
   const [score, setScore] = useState(0);
   const [input, setInput] = useState("");
-  const [timerKey, setTimerKey] = useState(0); // To reset timer
+  const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    let timer;
+    if (gameActive) {
+      setStartTime(Date.now());
+      timer = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [gameActive, startTime]);
+
+  useEffect(() => {
+    if (gameActive) {
+      inputRef.current?.focus();
+    }
+  }, [question]);
 
   const startGame = () => {
     setGameActive(true);
     setScore(0);
-    setQuestion(generateQuestion(maxTable));
-    setTimerKey((prev) => prev + 1); // Reset timer
+    setCurrentQuestion(1);
+    setQuestion(generateQuestion());
+    setElapsedTime(0);
+    setStartTime(Date.now());
   };
 
   const handleAnswer = () => {
@@ -21,8 +45,19 @@ function App() {
       setScore(score + 1);
     }
     setInput("");
-    setQuestion(generateQuestion(maxTable));
-    setTimerKey((prev) => prev + 1); // Reset timer
+
+    if (currentQuestion < TOTAL_QUESTIONS) {
+      setCurrentQuestion(currentQuestion + 1);
+      setQuestion(generateQuestion());
+    } else {
+      setGameActive(false);
+    }
+  };
+
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
   return (
@@ -30,17 +65,7 @@ function App() {
       {!gameActive ? (
         <div className="w-4/5 max-w-md p-6 bg-white text-black rounded-lg shadow-xl text-center">
           <h1 className="text-3xl font-bold mb-4 text-indigo-600">Math Puzzle</h1>
-          <label className="block text-lg font-medium mb-2">
-            Select Tables (1–15):
-          </label>
-          <input
-            type="number"
-            value={maxTable}
-            onChange={(e) => setMaxTable(parseInt(e.target.value))}
-            min="1"
-            max="15"
-            className="w-full p-2 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500"
-          />
+          <p className="text-lg font-medium mb-4">Answer multiplication questions as fast as you can!</p>
           <button
             onClick={startGame}
             className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-300"
@@ -51,18 +76,15 @@ function App() {
       ) : (
         <div className="text-center w-4/5 max-w-md">
           <h1 className="text-2xl font-bold mb-4">Score: {score}</h1>
-          <Timer
-            key={timerKey} // Reset timer when question changes
-            seconds={30}
-            onTimeout={() => {
-              alert("Time's up!");
-              setGameActive(false);
-            }}
-          />
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-lg font-medium">Question: {currentQuestion}/{TOTAL_QUESTIONS}</span>
+            <span className="text-lg font-medium">Time: {formatTime(elapsedTime)}</span>
+          </div>
           <h2 className="text-4xl font-extrabold my-6">
             {question.num1} x {question.num2} = ?
           </h2>
           <input
+            ref={inputRef}
             type="number"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -76,32 +98,26 @@ function App() {
           </button>
         </div>
       )}
+      {!gameActive && currentQuestion > TOTAL_QUESTIONS && (
+        <div className="w-4/5 max-w-md mt-6 p-6 bg-white text-black rounded-lg shadow-xl text-center">
+          <h1 className="text-2xl font-bold text-indigo-600">Game Over!</h1>
+          <p className="text-lg font-medium">Your Score: {score}/{TOTAL_QUESTIONS}</p>
+          <p className="text-lg font-medium">Total Time: {formatTime(elapsedTime)}</p>
+          <button
+            onClick={startGame}
+            className="mt-4 w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-300"
+          >
+            Play Again
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function Timer({ seconds, onTimeout }) {
-  const [timeLeft, setTimeLeft] = useState(seconds);
-
-  React.useEffect(() => {
-    if (timeLeft <= 0) {
-      onTimeout();
-      return;
-    }
-    const interval = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft, onTimeout]);
-
-  return (
-    <div className="text-xl font-semibold text-yellow-300">
-      Time Left: {timeLeft}s
-    </div>
-  );
-}
-
-function generateQuestion(maxTable) {
-  const num1 = Math.floor(Math.random() * maxTable) + 1;
-  const num2 = Math.floor(Math.random() * maxTable) + 1;
+function generateQuestion() {
+  const num1 = Math.floor(Math.random() * 15) + 1;
+  const num2 = Math.floor(Math.random() * 15) + 1;
   return { num1, num2, answer: num1 * num2 };
 }
 
