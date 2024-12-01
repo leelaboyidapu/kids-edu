@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/kids-edu/static/css/main.1e29b2a7.css",
-    "main.js": "/kids-edu/static/js/main.62fa10dd.js",
+    "main.js": "/kids-edu/static/js/main.0d8bfd8c.js",
     "static/js/453.fce00226.chunk.js": "/kids-edu/static/js/453.fce00226.chunk.js",
     "index.html": "/kids-edu/index.html",
     "main.1e29b2a7.css.map": "/kids-edu/static/css/main.1e29b2a7.css.map",
-    "main.62fa10dd.js.map": "/kids-edu/static/js/main.62fa10dd.js.map",
+    "main.0d8bfd8c.js.map": "/kids-edu/static/js/main.0d8bfd8c.js.map",
     "453.fce00226.chunk.js.map": "/kids-edu/static/js/453.fce00226.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1e29b2a7.css",
-    "static/js/main.62fa10dd.js"
+    "static/js/main.0d8bfd8c.js"
   ]
 }
