@@ -4,7 +4,7 @@ import "./App.css";
 const words = ["elephant", "giraffe", "kangaroo", "hippopotamus", "crocodile"];
 
 function App() {
-  const TOTAL_QUESTIONS = 10;
+  const TOTAL_QUESTIONS = 50;
 
   const [gameActive, setGameActive] = useState(false);
   const [testType, setTestType] = useState(null); // "multiplication" or "spelling"
@@ -79,6 +79,7 @@ function App() {
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex flex-col items-center justify-center">
       {!gameActive && !testType && (
@@ -135,7 +136,7 @@ function App() {
           </button>
         </div>
       )}
-      {!gameActive && testType && currentQuestion > TOTAL_QUESTIONS && (
+      {!gameActive && testType && currentQuestion >= TOTAL_QUESTIONS && (
         <div className="w-4/5 max-w-md mt-6 p-6 bg-white text-black rounded-lg shadow-xl text-center">
           <h1 className="text-3xl font-bold text-purple-600">Game Over!</h1>
           <div className="bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-lg text-white shadow-lg">
