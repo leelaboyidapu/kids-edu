@@ -84,7 +84,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex flex-col items-center justify-center">
       {!gameActive && !testType && (
         <div className="w-4/5 max-w-md p-6 bg-white text-black rounded-lg shadow-xl text-center">
-          <h1 className="text-3xl font-bold mb-4 text-indigo-600">Choose Your Test</h1>
+          <h1 className="text-3xl font-bold mb-4 text-indigo-600">Choose Your Test!</h1>
           <button
             onClick={() => startGame("multiplication")}
             className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-300 mb-4"
