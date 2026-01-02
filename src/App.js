@@ -8,7 +8,7 @@ import { formatTime } from "./utils";
 import TopMenuBar from "./components/TopMenuBar";
 
 function App() {
-  const TOTAL_QUESTIONS = 5;
+  const TOTAL_QUESTIONS = 25;
 
   const [gameActive, setGameActive] = useState(false);
   const [testType, setTestType] = useState(null);
