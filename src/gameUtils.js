@@ -14,30 +14,43 @@ export function generateSpellingQuestion() {
   return { word };
 }
 
-// export function generateDivisibilityQuestion() {
-//   const number = Math.floor(Math.random() * (99999 - 10 + 1)) + 10; // Random number between 10 and 99999
-//   const divisor = divisors[Math.floor(Math.random() * divisors.length)];
-//   const answer = (number % divisor === 0) ? "yes" : "no";
-//   return { number, divisor, answer };
-// }
-
 export function generateDivisibilityQuestion() {
-  // Step 1: Pick digit length with equal probability
+  // 1. Pick digit length equally
   const digitLengths = [2, 3, 4, 5];
   const digits = digitLengths[Math.floor(Math.random() * digitLengths.length)];
 
-  // Step 2: Generate number within the selected digit range
   const min = Math.pow(10, digits - 1);
   const max = Math.pow(10, digits) - 1;
-  const number = Math.floor(Math.random() * (max - min + 1)) + min;
 
-  // Step 3: Pick divisor
+  // 2. Pick divisor
   const divisor = divisors[Math.floor(Math.random() * divisors.length)];
 
-  // Step 4: Compute answer
-  const answer = number % divisor === 0 ? "yes" : "no";
+  // 3. Decide answer (75% yes, 25% no)
+  const shouldBeDivisible = Math.random() < 0.75;
 
-  return { number, divisor, answer };
+  let number;
+
+  if (shouldBeDivisible) {
+    // Generate a divisible number
+    const minMultiplier = Math.ceil(min / divisor);
+    const maxMultiplier = Math.floor(max / divisor);
+    const multiplier =
+      Math.floor(Math.random() * (maxMultiplier - minMultiplier + 1)) +
+      minMultiplier;
+
+    number = multiplier * divisor;
+  } else {
+    // Generate a non-divisible number
+    do {
+      number = Math.floor(Math.random() * (max - min + 1)) + min;
+    } while (number % divisor === 0);
+  }
+
+  return {
+    number,
+    divisor,
+    answer: shouldBeDivisible ? "yes" : "no",
+  };
 }
 
 export function checkAnswer(testType, input, question) {

@@ -5,6 +5,7 @@ import QuestionDisplay from "./components/QuestionDisplay";
 import ResultScreen from "./components/ResultScreen";
 import { generateMultiplicationQuestion, generateSpellingQuestion, generateDivisibilityQuestion, checkAnswer } from "./gameUtils";
 import { formatTime } from "./utils";
+import TopMenuBar from "./components/TopMenuBar";
 
 function App() {
   const TOTAL_QUESTIONS = 5;
@@ -83,31 +84,34 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex flex-col items-center justify-center">
-      {!gameActive && !testType && <StartMenu startGame={startGame} />}
-      {gameActive && (
-        <QuestionDisplay
-          testType={testType}
-          question={question}
-          input={input}
-          setInput={setInput}
-          handleAnswer={handleAnswer}
-          currentQuestion={currentQuestion}
-          totalQuestions={TOTAL_QUESTIONS}
-          elapsedTime={elapsedTime}
-        />
-      )}
-      {!gameActive && testType && currentQuestion >= TOTAL_QUESTIONS && (
-        <ResultScreen
-          score={score}
-          totalQuestions={TOTAL_QUESTIONS}
-          elapsedTime={elapsedTime}
-          resetGame={resetGame}
-          questions={questions}
-          userAnswers={userAnswers}
-          correctAnswers={correctAnswers}
-        />
-      )}
+    <div>
+      <TopMenuBar />
+      <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex flex-col items-center justify-center">
+        {!gameActive && !testType && <StartMenu startGame={startGame} />}
+        {gameActive && (
+          <QuestionDisplay
+            testType={testType}
+            question={question}
+            input={input}
+            setInput={setInput}
+            handleAnswer={handleAnswer}
+            currentQuestion={currentQuestion}
+            totalQuestions={TOTAL_QUESTIONS}
+            elapsedTime={elapsedTime}
+          />
+        )}
+        {!gameActive && testType && currentQuestion >= TOTAL_QUESTIONS && (
+          <ResultScreen
+            score={score}
+            totalQuestions={TOTAL_QUESTIONS}
+            elapsedTime={elapsedTime}
+            resetGame={resetGame}
+            questions={questions}
+            userAnswers={userAnswers}
+            correctAnswers={correctAnswers}
+          />
+        )}
+      </div>
     </div>
   );
 }

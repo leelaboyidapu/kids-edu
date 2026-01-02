@@ -16,9 +16,6 @@ const QuestionDisplay = ({ testType, question, input, setInput, handleAnswer, cu
   return (
     <div className="text-center w-4/5 max-w-md">
       <h1 className="text-2xl font-bold mb-4">Score: {currentQuestion - 1}</h1>
-      {testType === "divisibility" && (
-        <p className="text-lg mb-4">Answer with 'yes' or 'no'</p>
-      )}
       <div className="flex justify-between items-center mb-4">
         <span className="text-lg font-medium">Question: {currentQuestion}/{totalQuestions}</span>
         <span className="text-lg font-medium">Time: {formatTime(elapsedTime)}</span>
@@ -41,28 +38,30 @@ const QuestionDisplay = ({ testType, question, input, setInput, handleAnswer, cu
         </button>
       )}
       {testType === "divisibility" ? (
-        <div className="flex justify-center mb-4">
-          <label className="mr-4">
-            <input
-              type="radio"
-              value="yes"
-              checked={input === "yes"}
-              onChange={(e) => setInput(e.target.value)}
-              className="mr-2"
-            />
-            Yes
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="no"
-              checked={input === "no"}
-              onChange={(e) => setInput(e.target.value)}
-              className="mr-2"
-            />
-            No
-          </label>
-        </div>
+<div className="flex justify-center gap-4 mb-4">
+    {["yes", "no"].map((option) => {
+      const isActive = input === option;
+
+      return (
+        <button
+          key={option}
+          type="button"
+          onClick={() => setInput(option)}
+          className={`
+            px-6 py-3 rounded-full text-sm font-semibold transition-all duration-200
+            border-2
+            ${
+              isActive
+                ? "bg-green-600 text-white border-green-600 scale-105 shadow-md"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-green-100 hover:border-green-400"
+            }
+          `}
+        >
+          {option.toUpperCase()}
+        </button>
+      );
+    })}
+  </div>
       ) : (
         <input
           ref={inputRef}
