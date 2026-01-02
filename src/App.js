@@ -1,171 +1,115 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-
-const words = ["elephant", "giraffe", "kangaroo", "hippopotamus", "crocodile"];
+import StartMenu from "./components/StartMenu";
+import QuestionDisplay from "./components/QuestionDisplay";
+import ResultScreen from "./components/ResultScreen";
+import { generateMultiplicationQuestion, generateSpellingQuestion, generateDivisibilityQuestion, checkAnswer } from "./gameUtils";
+import { formatTime } from "./utils";
 
 function App() {
-  const TOTAL_QUESTIONS = 50;
+  const TOTAL_QUESTIONS = 5;
 
   const [gameActive, setGameActive] = useState(false);
-  const [testType, setTestType] = useState(null); // "multiplication" or "spelling"
+  const [testType, setTestType] = useState(null);
   const [question, setQuestion] = useState({});
   const [score, setScore] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [correctAnswers, setCorrectAnswers] = useState([]);
   const [input, setInput] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  const inputRef = useRef(null);
-
-  // Timer effect
   useEffect(() => {
     let timer;
     if (gameActive) {
-      setStartTime(Date.now());
       timer = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+        setElapsedTime(Math.floor((Date.now() - (Date.now() - (elapsedTime * 1000))) / 1000));
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [gameActive, startTime]);
-
-  // Auto-focus on input box when question changes
-  useEffect(() => {
-    if (gameActive) {
-      inputRef.current?.focus();
-    }
-  }, [question]);
-
-  const speakWord = (word) => {
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.lang = "en-US";
-    speechSynthesis.speak(utterance);
-  };
+  }, [gameActive, elapsedTime]);
 
   const startGame = (type) => {
+    resetGame();
     setTestType(type);
     setGameActive(true);
     setScore(0);
     setCurrentQuestion(1);
     setElapsedTime(0);
-    setStartTime(Date.now());
-    setQuestion(type === "multiplication" ? generateMultiplicationQuestion() : generateSpellingQuestion());
+    setQuestion(type === "multiplication" ? generateMultiplicationQuestion() : type === "spelling" ? generateSpellingQuestion() : generateDivisibilityQuestion());
   };
 
   const handleAnswer = () => {
-    if (testType === "multiplication") {
-      if (parseInt(input) === question.answer) {
-        setScore(score + 1);
-      }
-    } else if (testType === "spelling") {
-      if (input.trim().toLowerCase() === question.word.toLowerCase()) {
-        setScore(score + 1);
-      }
+    const isCorrect = checkAnswer(testType, input, question);
+    if (isCorrect) {
+      setScore(score + 1);
     }
+
+    setUserAnswers([...userAnswers, input]);
+    setQuestions([...questions, question]);
+    setCorrectAnswers([...correctAnswers, getCorrectAnswer(testType, question)]);
 
     setInput("");
 
     if (currentQuestion < TOTAL_QUESTIONS) {
       setCurrentQuestion(currentQuestion + 1);
-      setQuestion(testType === "multiplication" ? generateMultiplicationQuestion() : generateSpellingQuestion());
+      setQuestion(testType === "multiplication" ? generateMultiplicationQuestion() : testType === "spelling" ? generateSpellingQuestion() : generateDivisibilityQuestion());
     } else {
       setGameActive(false);
     }
   };
 
-  const formatTime = (timeInSeconds) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const getCorrectAnswer = (type, question) => {
+    if (type === "multiplication") {
+      return question.answer;
+    } else if (type === "spelling") {
+      return question.word;
+    } else if (type === "divisibility") {
+      return question.answer;
+    }
   };
 
+  const resetGame = () => {
+    setTestType(null);
+    setGameActive(false);
+    setScore(0);
+    setCurrentQuestion(1);
+    setElapsedTime(0);
+
+    setUserAnswers([]);
+    setQuestions([]);
+    setCorrectAnswers([]);    
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex flex-col items-center justify-center">
-      {!gameActive && !testType && (
-        <div className="w-4/5 max-w-md p-6 bg-white text-black rounded-lg shadow-xl text-center">
-          <h1 className="text-3xl font-bold mb-4 text-indigo-600">Choose Your Test!</h1>
-          <button
-            onClick={() => startGame("multiplication")}
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-300 mb-4"
-          >
-            Multiplication Test
-          </button>
-          <button
-            onClick={() => startGame("spelling")}
-            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition duration-300"
-          >
-            Spelling Test
-          </button>
-        </div>
-      )}
+      {!gameActive && !testType && <StartMenu startGame={startGame} />}
       {gameActive && (
-        <div className="text-center w-4/5 max-w-md">
-          <h1 className="text-2xl font-bold mb-4">Score: {score}</h1>
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-medium">Question: {currentQuestion}/{TOTAL_QUESTIONS}</span>
-            <span className="text-lg font-medium">Time: {formatTime(elapsedTime)}</span>
-          </div>
-          <h2 className="text-4xl font-extrabold my-6">
-            {testType === "multiplication" ? (
-              `${question.num1} x ${question.num2} = ?`
-            ) : (
-              `Spell this word: 🔊`
-            )}
-          </h2>
-          {testType === "spelling" && (
-            <button
-              onClick={() => speakWord(question.word)}
-              className="mb-4 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
-            >
-              Hear the Word Again 🔊
-            </button>
-          )}
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="w-full p-2 border rounded-lg text-black mb-4 focus:ring-2 focus:ring-purple-500"
-          />
-          <button
-            onClick={handleAnswer}
-            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition duration-300"
-          >
-            Submit Answer
-          </button>
-        </div>
+        <QuestionDisplay
+          testType={testType}
+          question={question}
+          input={input}
+          setInput={setInput}
+          handleAnswer={handleAnswer}
+          currentQuestion={currentQuestion}
+          totalQuestions={TOTAL_QUESTIONS}
+          elapsedTime={elapsedTime}
+        />
       )}
       {!gameActive && testType && currentQuestion >= TOTAL_QUESTIONS && (
-        <div className="w-4/5 max-w-md mt-6 p-6 bg-white text-black rounded-lg shadow-xl text-center">
-          <h1 className="text-3xl font-bold text-purple-600">Game Over!</h1>
-          <div className="bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-lg text-white shadow-lg">
-            <p className="text-xl font-medium mb-4">
-              You answered <span className="font-bold">{score}</span> out of {TOTAL_QUESTIONS} questions correctly!
-            </p>
-            <p className="text-xl font-medium mb-4">Time Taken: {formatTime(elapsedTime)}</p>
-          </div>
-          <button
-            onClick={() => setTestType(null)}
-            className="mt-6 w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-lg font-semibold transition duration-300"
-          >
-            Go Back to Menu
-          </button>
-        </div>
+        <ResultScreen
+          score={score}
+          totalQuestions={TOTAL_QUESTIONS}
+          elapsedTime={elapsedTime}
+          resetGame={resetGame}
+          questions={questions}
+          userAnswers={userAnswers}
+          correctAnswers={correctAnswers}
+        />
       )}
     </div>
   );
-}
-
-function generateMultiplicationQuestion() {
-  const num1 = Math.floor(Math.random() * 15) + 1;
-  const num2 = Math.floor(Math.random() * 15) + 1;
-  return { num1, num2, answer: num1 * num2 };
-}
-
-function generateSpellingQuestion() {
-  const word = words[Math.floor(Math.random() * words.length)];
-  return { word, display: word.split("").map(() => "_").join("") };
 }
 
 export default App;
